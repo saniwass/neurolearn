@@ -52,3 +52,76 @@ export default function HomePage() {
     </main>
   );
 }
+import Link from 'next/link';
+
+export default function RegisterPage() {
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-bg px-4">
+      <div className="w-full max-w-xl rounded-3xl border border-white/10 bg-panel p-8 shadow-2xl">
+        <p className="text-xs uppercase tracking-[0.35em] text-cyan">NeuroLearn</p>
+        <h1 className="mt-4 text-4xl font-bold text-text">Registrieren</h1>
+
+        <div className="mt-8 grid gap-4 md:grid-cols-2">
+          <div className="md:col-span-2">
+            <label className="mb-2 block text-sm text-slate-300">Name</label>
+            <input
+              type="text"
+              placeholder="Max Mustermann"
+              className="w-full rounded-xl border border-white/10 bg-bg px-4 py-3 text-text outline-none placeholder:text-slate-500"
+            />
+          </div>
+
+          <div className="md:col-span-2">
+            <label className="mb-2 block text-sm text-slate-300">E-Mail</label>
+            <input
+              type="email"
+              placeholder="deine@email.de"
+              className="w-full rounded-xl border border-white/10 bg-bg px-4 py-3 text-text outline-none placeholder:text-slate-500"
+            />
+          </div>
+
+          <div className="md:col-span-2">
+            <label className="mb-2 block text-sm text-slate-300">Passwort</label>
+            <input
+              type="password"
+              placeholder="********"
+              className="w-full rounded-xl border border-white/10 bg-bg px-4 py-3 text-text outline-none placeholder:text-slate-500"
+            />
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm text-slate-300">Schulstufe</label>
+            <select className="w-full rounded-xl border border-white/10 bg-bg px-4 py-3 text-text outline-none">
+              <option>Gymnasium</option>
+              <option>Berufsschule</option>
+              <option>Studium</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm text-slate-300">Bundesland</label>
+            <select className="w-full rounded-xl border border-white/10 bg-bg px-4 py-3 text-text outline-none">
+              <option>Bayern</option>
+              <option>NRW</option>
+              <option>Berlin</option>
+              <option>Hamburg</option>
+            </select>
+          </div>
+
+          <div className="md:col-span-2">
+            <button className="w-full rounded-xl bg-primary px-4 py-3 font-medium text-white">
+              Konto erstellen
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-6 text-center text-sm text-slate-400">
+          Bereits registriert?{' '}
+          <Link href="/login" className="text-cyan">
+            Einloggen
+          </Link>
+        </div>
+      </div>
+    </main>
+  );
+}
