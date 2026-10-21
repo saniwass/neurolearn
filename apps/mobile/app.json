@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "name": "NeuroLearn",
+    "slug": "neurolearn",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "assetBundlePatterns": ["**/*"],
+    "ios": { "supportsTablet": true },
+    "android": { "adaptiveIcon": { "backgroundColor": "#0B1020" } }
+  }
+}
