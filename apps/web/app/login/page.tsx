@@ -58,3 +58,117 @@ export default function LoginPage() {
     </main>
   );
 }
+'use client';
+
+import { useEffect, useState } from 'react';
+
+type PlanItem = {
+  subject: string;
+  duration: number;
+  task: string;
+};
+
+type DashboardData = {
+  date: string;
+  plan: PlanItem[];
+};
+
+export default function DashboardPage() {
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const userRaw = localStorage.getItem('neurolearn_user');
+        if (!userRaw) return;
+
+        const user = JSON.parse(userRaw);
+        const res = await fetch(`http://localhost:8000/study-plan/?user_id=${user.id}`);
+        const json = await res.json();
+        setData(json);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadData();
+  }, []);
+
+  if (loading) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-bg text-text">
+        <p>Lädt...</p>
+      </main>
+    );
+  }
+
+  return (
+    <main className="min-h-screen bg-bg p-6 text-text">
+      <div className="mx-auto max-w-7xl">
+        <header className="mb-8">
+          <p className="text-xs uppercase tracking-[0.35em] text-cyan">NeuroLearn</p>
+          <h1 className="mt-3 text-4xl font-bold">Willkommen zurück</h1>
+        </header>
+
+        <section className="grid gap-5 md:grid-cols-3">
+          <div className="rounded-2xl border border-white/10 bg-panel p-5">
+            <p className="text-sm text-slate-300">Lernprofil</p>
+            <h2 className="mt-3 text-3xl font-semibold">92%</h2>
+            <p className="mt-2 text-sm text-slate-400">Persönlicher Lernstil erkannt</p>
+          </div>
+
+          <div className="rounded-2xl border border-white/10 bg-panel p-5">
+            <p className="text-sm text-slate-300">Heutiger Plan</p>
+            <h2 className="mt-3 text-3xl font-semibold">{data?.plan.length ?? 0} Fächer</h2>
+            <p className="mt-2 text-sm text-slate-400">Optimiert für Fokus & Erinnerung</p>
+          </div>
+
+          <div className="rounded-2xl border border-white/10 bg-panel p-5">
+            <p className="text-sm text-slate-300">Wiederholungen</p>
+            <h2 className="mt-3 text-3xl font-semibold">18 Karten</h2>
+            <p className="mt-2 text-sm text-slate-400">Spaced repetition aktiv</p>
+          </div>
+        </section>
+
+        <section className="mt-8 grid gap-6 lg:grid-cols-[1.5fr_1fr]">
+          <div className="rounded-2xl border border-white/10 bg-panel p-6">
+            <p className="text-lg font-semibold">Heutiger Lernplan</p>
+
+            <ul className="mt-5 space-y-3 text-slate-200">
+              {(data?.plan ?? []).map((item) => (
+                <li
+                  key={item.subject}
+                  className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-3"
+                >
+                  <div>
+                    <span className="font-medium">{item.subject}</span>
+                    <p className="text-sm text-slate-400">{item.task}</p>
+                  </div>
+                  <span>{item.duration} min</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="rounded-2xl border border-white/10 bg-panel p-6">
+            <p className="text-lg font-semibold">AI Insights</p>
+            <div className="mt-5 space-y-3 text-sm text-slate-300">
+              <div className="rounded-xl bg-primary/10 p-3">
+                Du lernst am besten visuell und mit kurzen Aktivierungsphasen.
+              </div>
+              <div className="rounded-xl bg-cyan/10 p-3">
+                Deine stärkste Lücke liegt in Latein-Grammatik.
+              </div>
+              <div className="rounded-xl bg-success/10 p-3">
+                Quiz-Ergebnisse steigen seit 3 Tagen kontinuierlich.
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  );
+}
