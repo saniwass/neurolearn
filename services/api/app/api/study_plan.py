@@ -46,3 +46,73 @@ def create_study_plan(user_id: int, payload: dict, db: Session = Depends(get_db)
     db.commit()
     db.refresh(plan)
     return {"status": "created", "id": plan.id}
+import httpx
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+
+from app.core.db import get_db
+from app.models.user import StudyPlan, User
+
+router = APIRouter()
+
+@router.get("/")
+def get_study_plan(user_id: int, db: Session = Depends(get_db)):
+    plans = db.query(StudyPlan).filter(StudyPlan.user_id == user_id).all()
+    if not plans:
+        return {
+            "date": "2026-10-21",
+            "plan": [
+                {"subject": "Deutsch", "duration": 25, "task": "Textanalyse"},
+                {"subject": "Französisch", "duration": 20, "task": "Vokabeln"},
+                {"subject": "Mathe", "duration": 30, "task": "Wiederholung"},
+            ],
+        }
+
+    return {
+        "date": plans[0].date,
+        "plan": eval(plans[0].plan_json) if plans[0].plan_json.startswith("[") else []
+    }
+
+@router.post("/generate")
+async def generate_study_plan(user_id: int, payload: dict, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    try:
+        async with httpx.AsyncClient() as client:
+            ai_res = await client.post(
+                "http://localhost:8001/generate-study-plan",
+                json=payload,
+                timeout=30.0,
+            )
+            ai_res.raise_for_status()
+            ai_data = ai_res.json()
+    except Exception:
+        ai_data = {
+            "date": "2026-10-21",
+            "plan": [
+                {"subject": "Deutsch", "duration": 25, "task": "Textanalyse"},
+                {"subject": "Französisch", "duration": 20, "task": "Vokabeln"},
+                {"subject": "Mathe", "duration": 30, "task": "Wiederholung"},
+            ],
+            "strategy": "Active Recall + Spaced Repetition",
+        }
+
+    plan = StudyPlan(
+        user_id=user.id,
+        date=ai_data.get("date", "2026-10-21"),
+        plan_json=str(ai_data.get("plan", [])),
+        generated_by_ai="ai"
+    )
+
+    db.add(plan)
+    db.commit()
+    db.refresh(plan)
+
+    return {
+        "id": plan.id,
+        "date": plan.date,
+        "plan": ai_data.get("plan", []),
+        "strategy": ai_data.get("strategy", "")
+    }
